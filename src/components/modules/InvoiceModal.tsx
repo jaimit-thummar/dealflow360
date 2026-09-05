@@ -88,6 +88,11 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             </div>
           </div>
 
+          {/* Partial Invoicing Communication */}
+          <div style={{ background: 'rgba(56, 217, 255, 0.08)', border: '1px solid rgba(56, 217, 255, 0.2)', padding: '10px 14px', borderRadius: '6px', fontSize: '12px', color: '#38d9ff', marginBottom: '20px' }}>
+            <strong>Fulfillment Note:</strong> Partial invoicing is tied to delivered quantities from warehouse fulfillment runs.
+          </div>
+
           <div className="table-glass-wrapper" style={{ marginBottom: '20px' }}>
             <table className="table-glass">
               <thead>
