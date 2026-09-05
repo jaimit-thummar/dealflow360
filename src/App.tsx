@@ -452,7 +452,13 @@ export const App: React.FC = () => {
               )}
 
               {activeModule === 'deal-health' && (
-                <DealHealthView dealHealthScores={dealHealthScores} />
+                <DealHealthView
+                  dealHealthScores={dealHealthScores}
+                  onOpenQuotation={(code) => {
+                    setActiveModule('quotations');
+                    addToast('info', `Opening Quotation ${code}`, `Navigated to Quotations workspace for inspection.`);
+                  }}
+                />
               )}
 
               {activeModule === 'reports' && <ReportsView />}
