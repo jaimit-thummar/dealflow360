@@ -36,7 +36,6 @@ import { ProductsView } from './components/modules/ProductsView';
 import { CustomerPortalView } from './components/customer/CustomerPortalView';
 import { QuotationCreateModal } from './components/modules/QuotationCreateModal';
 import { AuthView, UserAuthData } from './components/auth/AuthView';
-import { saveQuotationToSupabase } from './lib/supabaseService';
 
 export const App: React.FC = () => {
   // Authentication State (Default authenticated for seamless demo experience, or toggled)
@@ -111,7 +110,6 @@ export const App: React.FC = () => {
   // Handler: Create Quotation
   const handleCreateQuotation = (newQuotation: Quotation) => {
     setQuotations((prev) => [newQuotation, ...prev]);
-    saveQuotationToSupabase(newQuotation);
 
     if (newQuotation.requiresApproval) {
       const newApprovalRecord: ApprovalRecord = {
