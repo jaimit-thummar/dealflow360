@@ -39,7 +39,7 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
-  const [viewLayout, setViewLayout] = useState<'table' | 'kanban'>('table');
+  const [viewLayout, setViewLayout] = useState<'table' | 'kanban'>('kanban');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
 
