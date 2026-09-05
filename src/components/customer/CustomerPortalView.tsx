@@ -7,11 +7,9 @@ import {
   Calendar,
   Send,
   CheckCircle2,
-  AlertCircle,
   MessageSquare,
-  ShieldCheck,
   ArrowLeft,
-  Clock,
+  UserCheck,
 } from 'lucide-react';
 
 interface CustomerPortalViewProps {
@@ -29,12 +27,12 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   onCustomerAcceptQuote,
   onBackToInternal,
 }) => {
-  // Find target quotation or pick default
   const activeQuote =
     quotations.find((q) => q.id === activeQuotationId) ||
     quotations.find((q) => q.customerName === 'Acme Corp') ||
     quotations[0];
 
+  const [portalTab, setPortalTab] = useState<'quotation' | 'messages' | 'profile'>('quotation');
   const [counterDiscountInput, setCounterDiscountInput] = useState<number>(18.5);
   const [counterMessage, setCounterMessage] = useState<string>('');
   const [preferredDeliveryDate, setPreferredDeliveryDate] = useState<string>(activeQuote?.deliveryRequestDate || '2026-09-20');
@@ -43,9 +41,9 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
 
   if (!activeQuote) {
     return (
-      <div className="customer-portal-frame" style={{ padding: '40px', textAlign: 'center' }}>
+      <div style={{ padding: '60px', textAlign: 'center', color: '#9aa8ba' }}>
         <h2>No quotation selected for portal view</h2>
-        <button className="btn btn-primary" onClick={onBackToInternal} style={{ marginTop: '16px' }}>
+        <button className="btn-glass btn-glass-primary" onClick={onBackToInternal} style={{ marginTop: '16px' }}>
           Return to Sales Ops Console
         </button>
       </div>
@@ -66,82 +64,147 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
   };
 
   return (
-    <div className="customer-portal-frame">
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '24px 0' }}>
       {/* Customer Header Bar */}
-      <header className="portal-topbar">
+      <div
+        style={{
+          background: 'rgba(15, 28, 48, 0.7)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '12px',
+          padding: '16px 24px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ background: '#2563eb', padding: '6px', borderRadius: '4px', color: '#fff' }}>
-            <FileText size={18} />
+          <div style={{ background: '#2f8cff', padding: '8px', borderRadius: '8px', color: '#fff' }}>
+            <FileText size={20} />
           </div>
           <div>
-            <span style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff' }}>DealFlow360 Customer Portal</span>
-            <div style={{ fontSize: '11px', color: '#94a3b8' }}>Secure B2B Procurement Workspace</div>
+            <span style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff' }}>DealFlow360 Customer Portal</span>
+            <div style={{ fontSize: '12px', color: '#9aa8ba' }}>B2B Commercial Procurement Workspace</div>
           </div>
         </div>
 
-        <button className="btn btn-secondary btn-sm" onClick={onBackToInternal} style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
-          <ArrowLeft size={13} /> Switch to Sales Console
-        </button>
-      </header>
-
-      {/* Main Container */}
-      <div className="portal-container">
-        {/* Signed / Accepted Banner */}
-        {isSignedConfirmed && (
-          <div
-            style={{
-              backgroundColor: '#dcfce7',
-              border: '1px solid #bbf7d0',
-              borderRadius: '8px',
-              padding: '16px 24px',
-              marginBottom: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <CheckCircle2 size={24} style={{ color: '#166534' }} />
-              <div>
-                <strong style={{ fontSize: '15px', color: '#166534' }}>Quotation Accepted & Digitally Executed</strong>
-                <p style={{ fontSize: '13px', color: '#14532d', marginTop: '2px' }}>
-                  {`Confirmation Receipt #${activeQuote.code}-ACK | Delivery scheduled per contract terms.`}
-                </p>
-              </div>
-            </div>
-            <span className="badge badge-success">Contract Signed</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Customer Tabs */}
+          <div style={{ display: 'flex', gap: '4px', background: 'rgba(7,17,31,0.6)', padding: '2px', borderRadius: '6px' }}>
+            <button
+              className={`toggle-btn ${portalTab === 'quotation' ? 'active' : ''}`}
+              onClick={() => setPortalTab('quotation')}
+              style={{
+                padding: '4px 12px',
+                fontSize: '12px',
+                borderRadius: '4px',
+                background: portalTab === 'quotation' ? '#2f8cff' : 'transparent',
+                color: portalTab === 'quotation' ? '#fff' : '#9aa8ba',
+              }}
+            >
+              My Quotation
+            </button>
+            <button
+              className={`toggle-btn ${portalTab === 'messages' ? 'active' : ''}`}
+              onClick={() => setPortalTab('messages')}
+              style={{
+                padding: '4px 12px',
+                fontSize: '12px',
+                borderRadius: '4px',
+                background: portalTab === 'messages' ? '#2f8cff' : 'transparent',
+                color: portalTab === 'messages' ? '#fff' : '#9aa8ba',
+              }}
+            >
+              Messages ({activeQuote.negotiationHistory.length})
+            </button>
+            <button
+              className={`toggle-btn ${portalTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setPortalTab('profile')}
+              style={{
+                padding: '4px 12px',
+                fontSize: '12px',
+                borderRadius: '4px',
+                background: portalTab === 'profile' ? '#2f8cff' : 'transparent',
+                color: portalTab === 'profile' ? '#fff' : '#9aa8ba',
+              }}
+            >
+              Profile
+            </button>
           </div>
-        )}
 
-        {/* Commercial Quotation Paper Document */}
-        <div className="portal-paper">
+          <button className="btn-glass btn-glass-secondary btn-sm" onClick={onBackToInternal}>
+            <ArrowLeft size={13} /> Switch to Sales Console
+          </button>
+        </div>
+      </div>
+
+      {/* Confirmation Banner */}
+      {isSignedConfirmed && (
+        <div
+          style={{
+            background: 'rgba(49, 211, 138, 0.12)',
+            border: '1px solid rgba(49, 211, 138, 0.3)',
+            borderRadius: '12px',
+            padding: '18px 24px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <CheckCircle2 size={24} style={{ color: '#31d38a' }} />
+            <div>
+              <strong style={{ fontSize: '15px', color: '#31d38a' }}>Quotation Accepted & Digitally Executed</strong>
+              <p style={{ fontSize: '13px', color: '#9aa8ba', marginTop: '2px' }}>
+                {`Confirmation Receipt #${activeQuote.code}-ACK | Delivery scheduled per contract terms.`}
+              </p>
+            </div>
+          </div>
+          <span className="badge-glass badge-glass-positive">Contract Signed</span>
+        </div>
+      )}
+
+      {/* Content based on selected portal tab */}
+      {portalTab === 'profile' ? (
+        <div className="glass-panel">
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#f5f7fa', marginBottom: '12px' }}>Account Procurement Profile</h3>
+          <div style={{ fontSize: '13px', color: '#9aa8ba', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div>Account Name: <strong style={{ color: '#f5f7fa' }}>{activeQuote.customerName}</strong></div>
+            <div>Authorized Contact: <strong style={{ color: '#f5f7fa' }}>{activeQuote.customerContact} ({activeQuote.customerEmail})</strong></div>
+            <div>Shipping Address: <strong style={{ color: '#f5f7fa' }}>100 Industrial Parkway, Suite 400, Dallas, TX 75201</strong></div>
+          </div>
+        </div>
+      ) : (
+        /* Quotation & Messages Tab */
+        <div className="glass-panel">
           {/* Top Document Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', borderBottom: '2px solid #e2e8f0', paddingBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '20px' }}>
             <div>
               <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>Prepared For:</span>
-              <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>{activeQuote.customerName}</h2>
-              <p style={{ fontSize: '13px', color: '#475569', marginTop: '4px' }}>
+              <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#f5f7fa', marginTop: '2px' }}>{activeQuote.customerName}</h2>
+              <p style={{ fontSize: '13px', color: '#9aa8ba', marginTop: '4px' }}>
                 Attn: {activeQuote.customerContact} ({activeQuote.customerEmail})
               </p>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <span className="badge badge-neutral" style={{ fontSize: '12px' }}>Quotation Proposal</span>
-              <div className="font-mono" style={{ fontSize: '22px', fontWeight: 800, color: '#2563eb', marginTop: '4px' }}>
+              <span className="badge-glass badge-glass-neutral" style={{ fontSize: '12px' }}>Official Proposal</span>
+              <div className="font-mono" style={{ fontSize: '22px', fontWeight: 800, color: '#38d9ff', marginTop: '4px' }}>
                 {activeQuote.code}
               </div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+              <div style={{ fontSize: '12px', color: '#9aa8ba', marginTop: '4px' }}>
                 Valid Until: <strong>{activeQuote.validUntil}</strong>
               </div>
             </div>
           </div>
 
-          {/* Line Items Table (NO INTERNAL MARGINS / NO COGS / NO INTERNAL ROLES) */}
+          {/* Line Items Table (NO INTERNAL MARGINS / NO COGS EXPOSED) */}
           <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>Proposed Commercial Products & Services</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#f5f7fa', marginBottom: '12px' }}>Proposed Commercial Products & Services</h3>
 
-            <div className="table-container">
-              <table className="data-table">
+            <div className="table-glass-wrapper">
+              <table className="table-glass">
                 <thead>
                   <tr>
                     <th>Item Description</th>
@@ -155,11 +218,11 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                 <tbody>
                   {activeQuote.items.map((item) => (
                     <tr key={item.id}>
-                      <td style={{ fontWeight: 600 }}>{item.productName}</td>
+                      <td style={{ fontWeight: 600, color: '#f5f7fa' }}>{item.productName}</td>
                       <td className="font-mono" style={{ fontSize: '12px', color: '#64748b' }}>{item.sku}</td>
                       <td className="number-cell font-mono">{item.quantity}</td>
                       <td className="number-cell font-mono">${item.unitPrice.toFixed(2)}</td>
-                      <td className="number-cell font-mono" style={{ color: item.discountPct > 0 ? '#b45309' : '#0f172a' }}>
+                      <td className="number-cell font-mono" style={{ color: item.discountPct > 0 ? '#f5b544' : '#f5f7fa' }}>
                         {item.discountPct > 0 ? `${item.discountPct}%` : 'Standard'}
                       </td>
                       <td className="number-cell font-mono" style={{ fontWeight: 700 }}>
@@ -177,19 +240,19 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             style={{
               display: 'flex',
               justifyContent: 'flex-end',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'rgba(7, 17, 31, 0.6)',
+              border: '1px solid var(--border-glass)',
               padding: '20px',
-              borderRadius: '6px',
+              borderRadius: '8px',
               marginBottom: '28px',
             }}
           >
             <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#64748b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#9aa8ba' }}>
                 <span>Subtotal:</span>
-                <span className="font-mono">${activeQuote.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span className="font-mono" style={{ color: '#f5f7fa' }}>${activeQuote.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#b45309' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#f5b544' }}>
                 <span>Total Discount Applied:</span>
                 <span className="font-mono">-${activeQuote.discountAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
               </div>
@@ -199,13 +262,13 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                   justifyContent: 'space-between',
                   fontSize: '18px',
                   fontWeight: 800,
-                  color: '#0f172a',
-                  borderTop: '2px solid #e2e8f0',
+                  color: '#f5f7fa',
+                  borderTop: '1px solid var(--border-glass)',
                   paddingTop: '8px',
                 }}
               >
                 <span>Final Contract Total:</span>
-                <span className="font-mono" style={{ color: '#2563eb' }}>
+                <span className="font-mono" style={{ color: '#38d9ff' }}>
                   ${activeQuote.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </span>
               </div>
@@ -213,34 +276,32 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
           </div>
 
           {/* Customer Action & Negotiation Panel */}
-          <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '24px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <MessageSquare size={16} style={{ color: '#2563eb' }} /> Negotiation & Discussion Thread
+          <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '24px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#f5f7fa', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <MessageSquare size={16} style={{ color: '#38d9ff' }} /> Negotiation & Discussion Thread
             </h3>
 
-            {/* Negotiation History Messages */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+            {/* Messages List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               {activeQuote.negotiationHistory.map((msg) => (
                 <div
                   key={msg.id}
                   style={{
-                    backgroundColor: msg.senderRole === 'customer' ? '#eff6ff' : '#f8fafc',
-                    border: `1px solid ${msg.senderRole === 'customer' ? '#bfdbfe' : '#e2e8f0'}`,
-                    padding: '12px 16px',
-                    borderRadius: '6px',
-                    marginLeft: msg.senderRole === 'customer' ? '0' : '20px',
-                    marginRight: msg.senderRole === 'customer' ? '20px' : '0',
+                    background: msg.senderRole === 'customer' ? 'rgba(47, 140, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                    border: `1px solid ${msg.senderRole === 'customer' ? 'rgba(47, 140, 255, 0.3)' : 'var(--border-glass)'}`,
+                    padding: '14px 18px',
+                    borderRadius: '8px',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748b', marginBottom: '4px' }}>
-                    <strong style={{ color: msg.senderRole === 'customer' ? '#1d4ed8' : '#0f172a' }}>
-                      {msg.senderName} ({msg.senderRole === 'customer' ? 'Your Team' : 'DealFlow360 Account Representative'})
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#9aa8ba', marginBottom: '4px' }}>
+                    <strong style={{ color: msg.senderRole === 'customer' ? '#38d9ff' : '#f5f7fa' }}>
+                      {msg.senderName} ({msg.senderRole === 'customer' ? 'Your Procurement Team' : 'DealFlow360 Sales Representative'})
                     </strong>
                     <span>{msg.timestamp}</span>
                   </div>
-                  <div style={{ fontSize: '13px', color: '#0f172a' }}>{msg.message}</div>
+                  <div style={{ fontSize: '13px', color: '#f5f7fa' }}>{msg.message}</div>
                   {msg.proposedDiscountPct !== undefined && (
-                    <div style={{ marginTop: '6px', fontSize: '12px', fontWeight: 600, color: '#b45309' }}>
+                    <div style={{ marginTop: '6px', fontSize: '12px', fontWeight: 600, color: '#f5b544' }}>
                       Requested Discount Counter: {msg.proposedDiscountPct}%
                     </div>
                   )}
@@ -248,41 +309,41 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
               ))}
             </div>
 
-            {/* Counter Offer Drawer / Form */}
+            {/* Counter Form / Actions */}
             {isCounterFormOpen ? (
-              <form onSubmit={handleCounterSubmit} style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', padding: '16px', borderRadius: '6px', marginBottom: '20px' }}>
-                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#92400e', marginBottom: '12px' }}>
+              <form onSubmit={handleCounterSubmit} style={{ background: 'rgba(245, 181, 68, 0.08)', border: '1px solid rgba(245, 181, 68, 0.25)', padding: '18px', borderRadius: '8px', marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#f5b544', marginBottom: '12px' }}>
                   Submit Formal Counter Discount Request
                 </h4>
 
-                <div className="form-grid" style={{ marginBottom: '12px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Requested Target Discount %</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Requested Target Discount %</label>
                     <input
                       type="number"
                       min="0"
                       max="50"
                       step="0.5"
-                      className="form-input"
+                      className="input-glass-select"
                       value={counterDiscountInput}
                       onChange={(e) => setCounterDiscountInput(Number(e.target.value))}
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Preferred Delivery Target Date</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Preferred Delivery Target Date</label>
                     <input
                       type="date"
-                      className="form-input"
+                      className="input-glass-select"
                       value={preferredDeliveryDate}
                       onChange={(e) => setPreferredDeliveryDate(e.target.value)}
                     />
                   </div>
 
-                  <div className="form-group full-width">
-                    <label className="form-label">Negotiation Rationale & Comments *</label>
+                  <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Negotiation Rationale & Comments *</label>
                     <textarea
-                      className="form-textarea"
+                      className="input-glass-select"
                       rows={3}
                       placeholder="Explain your procurement requirements or volume commitments..."
                       value={counterMessage}
@@ -293,10 +354,10 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsCounterFormOpen(false)}>
+                  <button type="button" className="btn-glass btn-glass-secondary btn-sm" onClick={() => setIsCounterFormOpen(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary btn-sm">
+                  <button type="submit" className="btn-glass btn-glass-primary btn-sm">
                     <Send size={12} /> Submit Counter Proposal
                   </button>
                 </div>
@@ -304,11 +365,11 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             ) : (
               !isSignedConfirmed && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <button className="btn btn-secondary" onClick={() => setIsCounterFormOpen(true)}>
+                  <button className="btn-glass btn-glass-secondary" onClick={() => setIsCounterFormOpen(true)}>
                     <MessageSquare size={14} /> Request Price Adjustment / Counter-Offer
                   </button>
 
-                  <button className="btn btn-success" style={{ padding: '10px 24px', fontSize: '14px' }} onClick={handleAcceptSign}>
+                  <button className="btn-glass btn-glass-success" style={{ padding: '11px 26px', fontSize: '14px' }} onClick={handleAcceptSign}>
                     <CheckCircle2 size={16} /> Accept & Digital Sign Quotation
                   </button>
                 </div>
@@ -316,7 +377,7 @@ export const CustomerPortalView: React.FC<CustomerPortalViewProps> = ({
             )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

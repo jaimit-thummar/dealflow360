@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { InvoiceRecord } from '../../types';
 import { Badge } from '../common/Badge';
-import { EmptyState } from '../common/EmptyState';
 import { InvoiceModal } from './InvoiceModal';
-import { Receipt, DollarSign, Send, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
+import { Receipt, CheckCircle2, AlertCircle, Send, FileText } from 'lucide-react';
 
 interface InvoicesViewProps {
   invoices: InvoiceRecord[];
@@ -22,69 +21,64 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
   const totalCollected = invoices.reduce((acc, i) => acc + i.amountPaid, 0);
   const totalOutstanding = totalInvoiced - totalCollected;
 
+  const unpaidCount = invoices.filter((i) => i.status !== 'paid').length;
+  const paidCount = invoices.filter((i) => i.status === 'paid').length;
+
   return (
     <div>
       {/* Page Header */}
-      <div className="page-header">
-        <div className="page-title-group">
-          <h1>Invoices & Accounts Receivable</h1>
-          <p className="page-subtitle">
+      <div className="page-header-row">
+        <div>
+          <h1 className="page-title">Invoices & Accounts Receivable</h1>
+          <p className="page-subheading">
             Billing management, payment collections tracking, Net 30/60 terms, and ledger reconciliation.
           </p>
         </div>
 
-        <div className="header-actions">
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#dc2626', backgroundColor: '#fee2e2', padding: '6px 14px', borderRadius: '4px', border: '1px solid #fecaca' }}>
-            Outstanding Balance: <strong className="font-mono">${totalOutstanding.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
-          </div>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: '#ff6b72', backgroundColor: 'rgba(255,107,114,0.12)', padding: '6px 14px', borderRadius: '6px', border: '1px solid rgba(255,107,114,0.3)' }}>
+          Outstanding Balance: <strong className="font-mono">${totalOutstanding.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
         </div>
       </div>
 
-      {/* KPI Overview */}
-      <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            <span>Total Invoiced Revenue</span>
-            <Receipt size={16} style={{ color: '#2563eb' }} />
+      {/* Top Indicators: Unpaid vs Paid */}
+      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '24px' }}>
+        <div className="kpi-glass-card">
+          <div className="kpi-head">
+            <span className="kpi-label">Unpaid Accounts</span>
+            <AlertCircle size={16} style={{ color: '#f5b544' }} />
           </div>
-          <div className="kpi-value font-mono">
+          <div className="kpi-main-val" style={{ color: '#f5b544' }}>
+            {unpaidCount} Unpaid
+          </div>
+          <div className="kpi-sub-label">Collection follow-ups required</div>
+        </div>
+
+        <div className="kpi-glass-card">
+          <div className="kpi-head">
+            <span className="kpi-label">Collected Payments</span>
+            <CheckCircle2 size={16} style={{ color: '#31d38a' }} />
+          </div>
+          <div className="kpi-main-val" style={{ color: '#31d38a' }}>
+            {paidCount} Paid
+          </div>
+          <div className="kpi-sub-label font-mono">${totalCollected.toLocaleString('en-US')} reconciled</div>
+        </div>
+
+        <div className="kpi-glass-card">
+          <div className="kpi-head">
+            <span className="kpi-label">Total Invoiced Revenue</span>
+            <Receipt size={16} style={{ color: '#38d9ff' }} />
+          </div>
+          <div className="kpi-main-val font-mono">
             ${totalInvoiced.toLocaleString('en-US', { minimumFractionDigits: 0 })}
           </div>
-          <div className="kpi-subtext positive">
-            <span>Commercial ledger total</span>
-          </div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-title">
-            <span>Collected Revenue</span>
-            <CheckCircle2 size={16} style={{ color: '#166534' }} />
-          </div>
-          <div className="kpi-value font-mono" style={{ color: '#166534' }}>
-            ${totalCollected.toLocaleString('en-US', { minimumFractionDigits: 0 })}
-          </div>
-          <div className="kpi-subtext positive">
-            <span>Reconciled cash payments</span>
-          </div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-title">
-            <span>Overdue Payments</span>
-            <AlertCircle size={16} style={{ color: '#dc2626' }} />
-          </div>
-          <div className="kpi-value font-mono" style={{ color: '#dc2626' }}>
-            {invoices.filter((i) => i.status === 'overdue').length}
-          </div>
-          <div className="kpi-subtext warning">
-            <span>Delta LLC payment past Net 30</span>
-          </div>
+          <div className="kpi-sub-label">Commercial ledger total</div>
         </div>
       </div>
 
       {/* Invoices Table */}
-      <div className="table-container">
-        <table className="data-table">
+      <div className="table-glass-wrapper">
+        <table className="table-glass">
           <thead>
             <tr>
               <th>Invoice #</th>
@@ -102,26 +96,26 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
           <tbody>
             {invoices.map((inv) => (
               <tr key={inv.id} className="clickable" onClick={() => setSelectedInvoice(inv)}>
-                <td className="font-mono" style={{ fontWeight: 700, color: '#2563eb' }}>
+                <td className="font-mono" style={{ fontWeight: 700, color: '#2f8cff' }}>
                   {inv.invoiceNumber}
                 </td>
-                <td className="font-mono" style={{ fontSize: '12px', color: '#64748b' }}>
+                <td className="font-mono" style={{ fontSize: '12px', color: '#9aa8ba' }}>
                   {inv.quotationCode}
                 </td>
                 <td>
-                  <div style={{ fontWeight: 600 }}>{inv.customerName}</div>
+                  <div style={{ fontWeight: 600, color: '#f5f7fa' }}>{inv.customerName}</div>
                 </td>
                 <td style={{ fontSize: '12px' }}>{inv.issueDate}</td>
-                <td style={{ fontSize: '12px', color: inv.status === 'overdue' ? '#dc2626' : '#475569' }}>
+                <td style={{ fontSize: '12px', color: inv.status === 'overdue' ? '#ff6b72' : '#9aa8ba' }}>
                   {inv.dueDate}
                 </td>
                 <td>
-                  <span className="badge badge-neutral">{inv.paymentTerms}</span>
+                  <span className="badge-glass badge-glass-neutral">{inv.paymentTerms}</span>
                 </td>
                 <td className="number-cell font-mono" style={{ fontWeight: 700 }}>
                   ${inv.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </td>
-                <td className="number-cell font-mono" style={{ color: '#166534' }}>
+                <td className="number-cell font-mono" style={{ color: '#31d38a' }}>
                   ${inv.amountPaid.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </td>
                 <td>
@@ -130,16 +124,15 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                 <td className="number-cell" onClick={(e) => e.stopPropagation()}>
                   <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                     <button
-                      className="btn btn-secondary btn-sm"
+                      className="btn-glass btn-glass-secondary btn-sm"
                       onClick={() => setSelectedInvoice(inv)}
                     >
                       <FileText size={12} /> View PDF
                     </button>
                     {inv.status !== 'paid' && (
                       <button
-                        className="btn btn-ghost btn-sm"
+                        className="btn-glass btn-glass-primary btn-sm"
                         onClick={() => onSendReminder(inv.id)}
-                        title="Send Payment Reminder Email"
                       >
                         <Send size={12} /> Reminder
                       </button>

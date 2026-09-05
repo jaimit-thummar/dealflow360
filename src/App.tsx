@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ModuleType,
   ViewMode,
@@ -21,6 +21,8 @@ import {
   INITIAL_DEAL_HEALTH,
 } from './data/mockData';
 import { Header } from './components/layout/Header';
+import { Sidebar } from './components/layout/Sidebar';
+import { GlobalSearchModal } from './components/layout/GlobalSearchModal';
 import { ToastContainer, ToastMessage } from './components/common/Toast';
 import { DashboardView } from './components/modules/DashboardView';
 import { QuotationsView } from './components/modules/QuotationsView';
@@ -33,11 +35,13 @@ import { ReportsView } from './components/modules/ReportsView';
 import { ProductsView } from './components/modules/ProductsView';
 import { CustomerPortalView } from './components/customer/CustomerPortalView';
 import { QuotationCreateModal } from './components/modules/QuotationCreateModal';
+import { saveQuotationToSupabase } from './lib/supabaseService';
 
 export const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('internal');
   const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
   const [activeQuotationForPortal, setActiveQuotationForPortal] = useState<string | undefined>(undefined);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Core Operational Datasets State
   const [customers] = useState(INITIAL_CUSTOMERS);
@@ -65,9 +69,22 @@ export const App: React.FC = () => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // Keyboard shortcut listener for ⌘ K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Handler: Create Quotation
   const handleCreateQuotation = (newQuotation: Quotation) => {
     setQuotations((prev) => [newQuotation, ...prev]);
+    saveQuotationToSupabase(newQuotation);
 
     if (newQuotation.requiresApproval) {
       const newApprovalRecord: ApprovalRecord = {
@@ -102,7 +119,6 @@ export const App: React.FC = () => {
         if (q.id === quotationId) {
           const updated = { ...q, status: newStatus };
           if (newStatus === 'fulfilled') {
-            // Auto create fulfillment record if not existing
             const exists = fulfillments.some((f) => f.quotationId === quotationId);
             if (!exists) {
               const newFul: FulfillmentRecord = {
@@ -146,7 +162,6 @@ export const App: React.FC = () => {
       )
     );
 
-    // Update quote status
     handleUpdateQuotationStatus(targetApproval.quotationId, 'approved');
     addToast('success', `Approval Granted for ${targetApproval.quotationCode}`, `Rationale logged: ${rationale}`);
   };
@@ -267,7 +282,6 @@ export const App: React.FC = () => {
       })
     );
 
-    // Auto create fulfillment record
     const targetQ = quotations.find((q) => q.id === quotationId);
     if (targetQ) {
       const newFul: FulfillmentRecord = {
@@ -311,97 +325,106 @@ export const App: React.FC = () => {
   const pendingApprovalsCount = approvals.filter((a) => a.status === 'pending').length;
 
   return (
-    <div className="app-container">
-      {/* Top Application Header Shell */}
+    <div className="app-frame">
+      {/* Top Application Header */}
       <Header
-        activeModule={activeModule}
-        setActiveModule={setActiveModule}
         viewMode={viewMode}
         setViewMode={setViewMode}
+        onOpenSearch={() => setIsSearchOpen(true)}
         pendingApprovalsCount={pendingApprovalsCount}
       />
 
-      {/* Main Workspace Body */}
-      <main className="main-content">
-        {viewMode === 'customer' ? (
-          <CustomerPortalView
-            quotations={quotations}
-            activeQuotationId={activeQuotationForPortal}
-            onCustomerSubmitCounter={handleCustomerSubmitCounter}
-            onCustomerAcceptQuote={handleCustomerAcceptQuote}
-            onBackToInternal={() => setViewMode('internal')}
+      {/* Main Body with Glass Sidebar */}
+      <div className="layout-body">
+        {viewMode === 'internal' && (
+          <Sidebar
+            activeModule={activeModule}
+            setActiveModule={setActiveModule}
+            pendingApprovalsCount={pendingApprovalsCount}
           />
-        ) : (
-          <>
-            {activeModule === 'dashboard' && (
-              <DashboardView
-                quotations={quotations}
-                approvals={approvals}
-                fulfillments={fulfillments}
-                subscriptions={subscriptions}
-                dealHealthScores={dealHealthScores}
-                setActiveModule={setActiveModule}
-                onSelectQuotation={(q) => {
-                  setActiveModule('quotations');
-                }}
-                onOpenCreateModal={() => setIsGlobalCreateModalOpen(true)}
-              />
-            )}
-
-            {activeModule === 'quotations' && (
-              <QuotationsView
-                quotations={quotations}
-                customers={customers}
-                products={products}
-                onCreateQuotation={handleCreateQuotation}
-                onUpdateStatus={handleUpdateQuotationStatus}
-                onOpenCustomerPortal={handleOpenCustomerPortalWithQuote}
-                onSendSalesRepMessage={handleSendSalesRepMessage}
-              />
-            )}
-
-            {activeModule === 'approvals' && (
-              <ApprovalsView
-                approvals={approvals}
-                onApprove={handleApproveRecord}
-                onReject={handleRejectRecord}
-              />
-            )}
-
-            {activeModule === 'fulfillment' && (
-              <FulfillmentView
-                fulfillments={fulfillments}
-                onUpdateFulfillment={handleUpdateFulfillment}
-              />
-            )}
-
-            {activeModule === 'subscriptions' && (
-              <SubscriptionsView
-                subscriptions={subscriptions}
-                onGenerateExpansionQuote={handleGenerateExpansionQuote}
-              />
-            )}
-
-            {activeModule === 'invoices' && (
-              <InvoicesView
-                invoices={invoices}
-                onMarkPaid={handleMarkPaid}
-                onSendReminder={handleSendInvoiceReminder}
-              />
-            )}
-
-            {activeModule === 'deal-health' && (
-              <DealHealthView dealHealthScores={dealHealthScores} />
-            )}
-
-            {activeModule === 'reports' && <ReportsView />}
-
-            {activeModule === 'products' && <ProductsView products={products} />}
-          </>
         )}
-      </main>
 
-      {/* Global Creation Modal if triggered */}
+        <main className="main-viewport" style={{ maxWidth: viewMode === 'customer' ? '100vw' : 'calc(100vw - 240px)' }}>
+          {viewMode === 'customer' ? (
+            <CustomerPortalView
+              quotations={quotations}
+              activeQuotationId={activeQuotationForPortal}
+              onCustomerSubmitCounter={handleCustomerSubmitCounter}
+              onCustomerAcceptQuote={handleCustomerAcceptQuote}
+              onBackToInternal={() => setViewMode('internal')}
+            />
+          ) : (
+            <>
+              {activeModule === 'dashboard' && (
+                <DashboardView
+                  quotations={quotations}
+                  approvals={approvals}
+                  fulfillments={fulfillments}
+                  subscriptions={subscriptions}
+                  dealHealthScores={dealHealthScores}
+                  setActiveModule={setActiveModule}
+                  onSelectQuotation={(q) => {
+                    setActiveModule('quotations');
+                  }}
+                  onOpenCreateModal={() => setIsGlobalCreateModalOpen(true)}
+                />
+              )}
+
+              {activeModule === 'quotations' && (
+                <QuotationsView
+                  quotations={quotations}
+                  customers={customers}
+                  products={products}
+                  onCreateQuotation={handleCreateQuotation}
+                  onUpdateStatus={handleUpdateQuotationStatus}
+                  onOpenCustomerPortal={handleOpenCustomerPortalWithQuote}
+                  onSendSalesRepMessage={handleSendSalesRepMessage}
+                />
+              )}
+
+              {activeModule === 'approvals' && (
+                <ApprovalsView
+                  approvals={approvals}
+                  onApprove={handleApproveRecord}
+                  onReject={handleRejectRecord}
+                />
+              )}
+
+              {activeModule === 'fulfillment' && (
+                <FulfillmentView
+                  fulfillments={fulfillments}
+                  onUpdateFulfillment={handleUpdateFulfillment}
+                />
+              )}
+
+              {activeModule === 'subscriptions' && (
+                <SubscriptionsView
+                  subscriptions={subscriptions}
+                  onGenerateExpansionQuote={handleGenerateExpansionQuote}
+                />
+              )}
+
+              {activeModule === 'invoices' && (
+                <InvoicesView
+                  invoices={invoices}
+                  onMarkPaid={handleMarkPaid}
+                  onSendReminder={handleSendInvoiceReminder}
+                />
+              )}
+
+              {activeModule === 'deal-health' && (
+                <DealHealthView dealHealthScores={dealHealthScores} />
+              )}
+
+              {activeModule === 'reports' && <ReportsView />}
+
+              {activeModule === 'products' && <ProductsView products={products} />}
+            </>
+          )}
+        </main>
+      </div>
+
+      {/* Global Creation Modal */}
       {isGlobalCreateModalOpen && (
         <QuotationCreateModal
           customers={customers}
@@ -414,6 +437,21 @@ export const App: React.FC = () => {
           }}
         />
       )}
+
+      {/* Global Keyboard ⌘ K Search Modal */}
+      <GlobalSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        quotations={quotations}
+        customers={customers}
+        products={products}
+        onSelectQuotation={(q) => {
+          setActiveModule('quotations');
+        }}
+        onSelectModule={(mod) => {
+          setActiveModule(mod);
+        }}
+      />
 
       {/* Toast Notification Layer */}
       <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />

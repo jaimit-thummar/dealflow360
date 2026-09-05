@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
-import { FulfillmentRecord, FulfillmentStatus, WarehouseHub } from '../../types';
+import { FulfillmentRecord, FulfillmentStatus } from '../../types';
 import { Badge } from '../common/Badge';
 import { EmptyState } from '../common/EmptyState';
 import {
   Truck,
-  Package,
   Warehouse,
   CheckCircle2,
-  Clock,
-  MapPin,
-  ExternalLink,
   Edit2,
   X,
+  Split,
 } from 'lucide-react';
 
 interface FulfillmentViewProps {
@@ -50,68 +47,76 @@ export const FulfillmentView: React.FC<FulfillmentViewProps> = ({
 
   return (
     <div>
-      {/* Top Header */}
-      <div className="page-header">
-        <div className="page-title-group">
-          <h1>Warehouse Fulfillment Operations</h1>
-          <p className="page-subtitle">
+      {/* Page Header */}
+      <div className="page-header-row">
+        <div>
+          <h1 className="page-title">Warehouse Fulfillment Operations</h1>
+          <p className="page-subheading">
             Stock reservation, multi-hub picking, logistics carrier sync, and shipment dispatch tracking.
           </p>
         </div>
 
-        <div className="header-actions">
-          <select
-            className="select-control"
-            value={selectedHub}
-            onChange={(e) => setSelectedHub(e.target.value)}
-          >
-            <option value="all">All Warehouse Hubs</option>
-            <option value="Dallas (HUB-01)">Dallas Hub (HUB-01)</option>
-            <option value="Chicago (HUB-02)">Chicago Hub (HUB-02)</option>
-            <option value="Frankfurt (HUB-03)">Frankfurt Hub (HUB-03)</option>
-          </select>
-        </div>
+        <select
+          className="input-glass-select"
+          value={selectedHub}
+          onChange={(e) => setSelectedHub(e.target.value)}
+        >
+          <option value="all">All Warehouse Hubs</option>
+          <option value="Dallas (HUB-01)">Dallas Hub (HUB-01)</option>
+          <option value="Chicago (HUB-02)">Chicago Hub (HUB-02)</option>
+          <option value="Frankfurt (HUB-03)">Frankfurt Hub (HUB-03)</option>
+        </select>
       </div>
 
-      {/* Warehouse Hub Status Cards */}
-      <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            <span>Dallas Hub (HUB-01)</span>
-            <Warehouse size={16} style={{ color: '#2563eb' }} />
-          </div>
-          <div className="kpi-value" style={{ fontSize: '18px', marginTop: '4px' }}>
-            Primary Logistics Hub
-          </div>
-          <div className="kpi-subtext positive">
-            <span>420 Workstations in Stock</span>
-          </div>
-        </div>
+      {/* Stock Availability Matrix */}
+      <div className="glass-panel" style={{ marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#f5f7fa', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Warehouse size={16} style={{ color: '#38d9ff' }} /> Regional Stock & Inventory Allocation Matrix
+        </h3>
 
-        <div className="kpi-card">
-          <div className="kpi-title">
-            <span>Chicago Hub (HUB-02)</span>
-            <Warehouse size={16} style={{ color: '#166534' }} />
-          </div>
-          <div className="kpi-value" style={{ fontSize: '18px', marginTop: '4px' }}>
-            Midwest Distribution
-          </div>
-          <div className="kpi-subtext positive">
-            <span>Active Picking Line</span>
-          </div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-title">
-            <span>Frankfurt Hub (HUB-03)</span>
-            <Warehouse size={16} style={{ color: '#64748b' }} />
-          </div>
-          <div className="kpi-value" style={{ fontSize: '18px', marginTop: '4px' }}>
-            EU Enterprise Gateway
-          </div>
-          <div className="kpi-subtext">
-            <span>Standby Capacity</span>
-          </div>
+        <div className="table-glass-wrapper">
+          <table className="table-glass">
+            <thead>
+              <tr>
+                <th>Warehouse Hub</th>
+                <th>Core Product SKUs</th>
+                <th className="number-cell">In Stock</th>
+                <th className="number-cell">Reserved (Picks)</th>
+                <th className="number-cell">Available Stock</th>
+                <th>Suggested Order Split Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong style={{ color: '#f5f7fa' }}>Dallas Hub (HUB-01)</strong>
+                </td>
+                <td>Laptop Pro 14 (HW-LTP-14)</td>
+                <td className="number-cell font-mono">420</td>
+                <td className="number-cell font-mono" style={{ color: '#f5b544' }}>90</td>
+                <td className="number-cell font-mono" style={{ color: '#31d38a', fontWeight: 700 }}>330 units</td>
+                <td>
+                  <button className="btn-glass btn-glass-secondary btn-sm">
+                    <Split size={12} /> Accept Suggested Split
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong style={{ color: '#f5f7fa' }}>Chicago Hub (HUB-02)</strong>
+                </td>
+                <td>Docking Station (HW-DCK-STN)</td>
+                <td className="number-cell font-mono">185</td>
+                <td className="number-cell font-mono" style={{ color: '#f5b544' }}>30</td>
+                <td className="number-cell font-mono" style={{ color: '#31d38a', fontWeight: 700 }}>155 units</td>
+                <td>
+                  <button className="btn-glass btn-glass-secondary btn-sm">
+                    Manual Override
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -122,8 +127,8 @@ export const FulfillmentView: React.FC<FulfillmentViewProps> = ({
           description="There are currently no orders assigned to the selected warehouse hub."
         />
       ) : (
-        <div className="table-container">
-          <table className="data-table">
+        <div className="table-glass-wrapper">
+          <table className="table-glass">
             <thead>
               <tr>
                 <th>Quote Code</th>
@@ -140,28 +145,28 @@ export const FulfillmentView: React.FC<FulfillmentViewProps> = ({
             <tbody>
               {filteredFulfillments.map((f) => (
                 <tr key={f.id}>
-                  <td className="font-mono" style={{ fontWeight: 700, color: '#2563eb' }}>
+                  <td className="font-mono" style={{ fontWeight: 700, color: '#2f8cff' }}>
                     {f.quotationCode}
                   </td>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{f.customerName}</div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>{f.notes || 'Standard Delivery'}</div>
+                    <div style={{ fontWeight: 600, color: '#f5f7fa' }}>{f.customerName}</div>
+                    <div style={{ fontSize: '11px', color: '#9aa8ba' }}>{f.notes || 'Standard Delivery'}</div>
                   </td>
                   <td>
-                    <span className="badge badge-neutral">{f.warehouseHub}</span>
+                    <span className="badge-glass badge-glass-neutral">{f.warehouseHub}</span>
                   </td>
                   <td className="number-cell font-mono">{f.itemsCount} units</td>
                   <td>{f.carrier || 'Unassigned'}</td>
-                  <td className="font-mono" style={{ fontSize: '12px', color: f.trackingNumber ? '#0f172a' : '#94a3b8' }}>
+                  <td className="font-mono" style={{ fontSize: '12px', color: f.trackingNumber ? '#38d9ff' : '#64748b' }}>
                     {f.trackingNumber || 'Pending Pick'}
                   </td>
-                  <td style={{ fontSize: '12px', color: '#64748b' }}>{f.dispatchDate || 'Pending'}</td>
+                  <td style={{ fontSize: '12px', color: '#9aa8ba' }}>{f.dispatchDate || 'Pending'}</td>
                   <td>
                     <Badge status={f.status} />
                   </td>
                   <td className="number-cell">
                     <button
-                      className="btn btn-secondary btn-sm"
+                      className="btn-glass btn-glass-secondary btn-sm"
                       onClick={() => handleOpenDispatchModal(f)}
                     >
                       <Edit2 size={13} /> Update Status
@@ -174,25 +179,25 @@ export const FulfillmentView: React.FC<FulfillmentViewProps> = ({
         </div>
       )}
 
-      {/* Dispatch Update Modal */}
+      {/* Dispatch Modal */}
       {editingRecord && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ width: '520px' }}>
-            <div className="modal-header">
-              <h3 className="card-title" style={{ margin: 0 }}>
+        <div className="search-modal-backdrop">
+          <div className="search-modal-box" style={{ width: '520px' }}>
+            <div className="search-modal-input-wrap">
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#f5f7fa', margin: 0 }}>
                 Update Fulfillment Dispatch ({editingRecord.quotationCode})
               </h3>
-              <button className="btn btn-ghost" onClick={() => setEditingRecord(null)}>
+              <button onClick={() => setEditingRecord(null)} style={{ color: '#9aa8ba' }}>
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSaveDispatch}>
-              <div className="modal-body">
-                <div className="form-group" style={{ marginBottom: '16px' }}>
-                  <label className="form-label">Order Fulfillment Stage *</label>
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Order Fulfillment Stage *</label>
                   <select
-                    className="form-select"
+                    className="input-glass-select"
                     value={statusInput}
                     onChange={(e) => setStatusInput(e.target.value as FulfillmentStatus)}
                   >
@@ -204,22 +209,22 @@ export const FulfillmentView: React.FC<FulfillmentViewProps> = ({
                   </select>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '16px' }}>
-                  <label className="form-label">Freight Carrier</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Freight Carrier</label>
                   <input
                     type="text"
-                    className="form-input"
+                    className="input-glass-select"
                     value={carrierInput}
                     onChange={(e) => setCarrierInput(e.target.value)}
                     placeholder="e.g. FedEx Freight Direct, UPS Enterprise"
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Tracking Number</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Tracking Number</label>
                   <input
                     type="text"
-                    className="form-input font-mono"
+                    className="input-glass-select font-mono"
                     value={trackingInput}
                     onChange={(e) => setTrackingInput(e.target.value)}
                     placeholder="e.g. FX-88492019-US"
@@ -227,11 +232,11 @@ export const FulfillmentView: React.FC<FulfillmentViewProps> = ({
                 </div>
               </div>
 
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setEditingRecord(null)}>
+              <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button type="button" className="btn-glass btn-glass-secondary" onClick={() => setEditingRecord(null)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn-glass btn-glass-primary">
                   Save Dispatch Info
                 </button>
               </div>

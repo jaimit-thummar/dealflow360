@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Customer, Product, Quotation } from '../../types';
 import { Badge } from '../common/Badge';
 import { EmptyState } from '../common/EmptyState';
-import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { QuotationCreateModal } from './QuotationCreateModal';
 import { QuotationDrawer } from './QuotationDrawer';
 import {
@@ -13,9 +12,9 @@ import {
   FileText,
   Building2,
   Calendar,
-  DollarSign,
   ChevronRight,
-  Sparkles,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 
 interface QuotationsViewProps {
@@ -40,9 +39,9 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
+  const [viewLayout, setViewLayout] = useState<'table' | 'kanban'>('table');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Filtering
   const filteredQuotations = quotations.filter((q) => {
@@ -84,76 +83,117 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
     document.body.removeChild(link);
   };
 
+  const kanbanColumns = [
+    { id: 'draft', label: 'Draft' },
+    { id: 'pending_approval', label: 'Pending Approval' },
+    { id: 'approved', label: 'Approved' },
+    { id: 'customer_countered', label: 'Negotiation' },
+    { id: 'accepted', label: 'Confirmed' },
+  ];
+
   return (
     <div>
-      {/* Top Page Header */}
-      <div className="page-header">
-        <div className="page-title-group">
-          <h1>Quotations & Commercial Proposals</h1>
-          <p className="page-subtitle">
+      {/* Page Header */}
+      <div className="page-header-row">
+        <div>
+          <h1 className="page-title">Quotations & Commercial Proposals</h1>
+          <p className="page-subheading">
             Manage quotation lifecycles, margin guardrails, and customer negotiation proposals.
           </p>
         </div>
 
-        <div className="header-actions">
-          <button className="btn btn-secondary" onClick={handleExportCSV}>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn-glass btn-glass-secondary" onClick={handleExportCSV}>
             <Download size={14} /> Export CSV
           </button>
-          <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+          <button className="btn-glass btn-glass-primary" onClick={() => setIsCreateModalOpen(true)}>
             <Plus size={15} /> Create Quotation
           </button>
         </div>
       </div>
 
-      {/* Filter and Controls Toolbar */}
-      <div className="filter-bar">
-        <div className="search-input-group">
-          <Search size={15} style={{ color: '#64748b' }} />
-          <input
-            type="text"
-            placeholder="Search quote code, customer, sales rep..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      {/* Filter and View Layout Toolbar */}
+      <div className="filter-glass-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="header-search-bar" style={{ width: '280px' }}>
+            <Search size={14} style={{ color: '#38d9ff' }} />
+            <input
+              type="text"
+              placeholder="Search code, customer, rep..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', color: '#9aa8ba' }}>Status:</span>
+            <select
+              className="input-glass-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All Statuses ({quotations.length})</option>
+              <option value="draft">Draft</option>
+              <option value="pending_approval">Pending Approval</option>
+              <option value="approved">Approved</option>
+              <option value="customer_countered">Customer Countered</option>
+              <option value="fulfilled">Fulfilled</option>
+            </select>
+
+            <select
+              className="input-glass-select"
+              value={customerFilter}
+              onChange={(e) => setCustomerFilter(e.target.value)}
+            >
+              <option value="all">All Customers</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="filter-group">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b' }}>
-            <Filter size={13} />
-            <span>Status:</span>
-          </div>
-          <select
-            className="select-control"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+        {/* View Toggle (Table vs Kanban) */}
+        <div style={{ display: 'flex', background: 'rgba(7, 17, 31, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '2px' }}>
+          <button
+            onClick={() => setViewLayout('table')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontWeight: 600,
+              background: viewLayout === 'table' ? '#2f8cff' : 'transparent',
+              color: viewLayout === 'table' ? '#fff' : '#9aa8ba',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
           >
-            <option value="all">All Statuses ({quotations.length})</option>
-            <option value="draft">Draft</option>
-            <option value="pending_approval">Pending Approval</option>
-            <option value="approved">Approved</option>
-            <option value="customer_countered">Customer Countered</option>
-            <option value="fulfilled">Fulfilled</option>
-          </select>
-
-          <select
-            className="select-control"
-            value={customerFilter}
-            onChange={(e) => setCustomerFilter(e.target.value)}
+            <List size={13} /> Table
+          </button>
+          <button
+            onClick={() => setViewLayout('kanban')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontWeight: 600,
+              background: viewLayout === 'kanban' ? '#2f8cff' : 'transparent',
+              color: viewLayout === 'kanban' ? '#fff' : '#9aa8ba',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
           >
-            <option value="all">All Customers</option>
-            {customers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            <LayoutGrid size={13} /> Kanban
+          </button>
         </div>
       </div>
 
-      {/* Main Dense Data Table */}
-      {isLoading ? (
-        <LoadingSkeleton rows={6} columns={7} />
-      ) : filteredQuotations.length === 0 ? (
+      {/* Main Content Layout (Table vs Kanban) */}
+      {filteredQuotations.length === 0 ? (
         <EmptyState
           isFilter={searchTerm !== '' || statusFilter !== 'all' || customerFilter !== 'all'}
           title="No quotations found"
@@ -161,9 +201,9 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
           actionText="Create Quotation"
           onAction={() => setIsCreateModalOpen(true)}
         />
-      ) : (
-        <div className="table-container">
-          <table className="data-table">
+      ) : viewLayout === 'table' ? (
+        <div className="table-glass-wrapper">
+          <table className="table-glass">
             <thead>
               <tr>
                 <th>Quote Code</th>
@@ -184,23 +224,23 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                   className="clickable"
                   onClick={() => setSelectedQuotation(q)}
                 >
-                  <td className="font-mono" style={{ fontWeight: 700, color: '#2563eb' }}>
+                  <td className="font-mono" style={{ fontWeight: 700, color: '#2f8cff' }}>
                     {q.code}
                   </td>
                   <td>
-                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{q.customerName}</div>
+                    <div style={{ fontWeight: 600, color: '#f5f7fa' }}>{q.customerName}</div>
                     <div style={{ fontSize: '11px', color: '#64748b' }}>{q.customerContact}</div>
                   </td>
                   <td>{q.salesRep}</td>
                   <td className="number-cell font-mono">{q.items.length} items</td>
                   <td className="number-cell font-mono" style={{ fontWeight: 700 }}>
-                    ${q.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ${q.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   </td>
                   <td
                     className="number-cell font-mono"
                     style={{
                       fontWeight: 600,
-                      color: q.marginPct < 20 ? '#dc2626' : '#166534',
+                      color: q.marginPct < 20 ? '#ff6b72' : '#31d38a',
                     }}
                   >
                     {q.marginPct.toFixed(1)}%
@@ -208,14 +248,70 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                   <td>
                     <Badge status={q.status} />
                   </td>
-                  <td style={{ fontSize: '12px', color: '#64748b' }}>{q.validUntil}</td>
+                  <td style={{ fontSize: '12px', color: '#9aa8ba' }}>{q.validUntil}</td>
                   <td>
-                    <ChevronRight size={16} style={{ color: '#94a3b8' }} />
+                    <ChevronRight size={16} style={{ color: '#64748b' }} />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      ) : (
+        /* Kanban View */
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
+          {kanbanColumns.map((col) => {
+            const colQuotes = filteredQuotations.filter((q) => q.status === col.id || (col.id === 'accepted' && q.status === 'fulfilled'));
+
+            return (
+              <div
+                key={col.id}
+                style={{
+                  background: 'rgba(15, 28, 48, 0.4)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '10px',
+                  padding: '14px',
+                  minHeight: '480px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 700, color: '#f5f7fa' }}>
+                  <span>{col.label}</span>
+                  <span style={{ background: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '10px', color: '#9aa8ba' }}>
+                    {colQuotes.length}
+                  </span>
+                </div>
+
+                {colQuotes.map((q) => (
+                  <div
+                    key={q.id}
+                    className="glass-card"
+                    style={{ padding: '12px', cursor: 'pointer' }}
+                    onClick={() => setSelectedQuotation(q)}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
+                      <strong className="font-mono" style={{ color: '#2f8cff' }}>{q.code}</strong>
+                      <Badge status={q.status} />
+                    </div>
+
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#f5f7fa' }}>{q.customerName}</div>
+                    <div style={{ fontSize: '11px', color: '#9aa8ba', marginTop: '2px' }}>{q.salesRep}</div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <span className="font-mono" style={{ fontSize: '14px', fontWeight: 700, color: '#38d9ff' }}>
+                        ${q.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                      </span>
+                      <span style={{ fontSize: '11px', color: q.marginPct < 20 ? '#ff6b72' : '#31d38a', fontWeight: 600 }}>
+                        {q.marginPct.toFixed(1)}% margin
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
       )}
 

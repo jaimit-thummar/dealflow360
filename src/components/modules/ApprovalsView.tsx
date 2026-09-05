@@ -6,11 +6,10 @@ import {
   CheckSquare,
   CheckCircle,
   XCircle,
-  AlertTriangle,
   ShieldCheck,
-  UserCheck,
-  FileText,
-  Lock,
+  RotateCcw,
+  ArrowRight,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface ApprovalsViewProps {
@@ -61,91 +60,81 @@ export const ApprovalsView: React.FC<ApprovalsViewProps> = ({
 
   return (
     <div>
-      {/* Top Header */}
-      <div className="page-header">
-        <div className="page-title-group">
-          <h1>Automated Approval Router</h1>
-          <p className="page-subtitle">
+      {/* Top Page Header */}
+      <div className="page-header-row">
+        <div>
+          <h1 className="page-title">Automated Approval Router</h1>
+          <p className="page-subheading">
             Governance controls, multi-tier discount delegation limits, and margin protection audit logs.
           </p>
         </div>
 
-        <div className="header-actions">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#166534', backgroundColor: '#dcfce7', padding: '6px 12px', borderRadius: '4px', border: '1px solid #bbf7d0', fontWeight: 600 }}>
-            <ShieldCheck size={16} /> Automated Guardrails Active
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#31d38a', backgroundColor: 'rgba(49,211,138,0.12)', padding: '6px 14px', borderRadius: '6px', border: '1px solid rgba(49,211,138,0.3)', fontWeight: 600 }}>
+          <ShieldCheck size={16} /> Automated Guardrails Active
         </div>
       </div>
 
-      {/* Policy Rules Overview Card */}
-      <div
-        style={{
-          backgroundColor: '#f8fafc',
-          border: '1px solid #cbd5e1',
-          borderRadius: '6px',
-          padding: '14px 20px',
-          marginBottom: '20px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '16px',
-        }}
-      >
-        <div style={{ borderRight: '1px solid #e2e8f0', paddingRight: '16px' }}>
-          <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
-            Tier 1: Manager Threshold
+      {/* Summary KPI Counter Cards */}
+      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '20px' }}>
+        <div className="kpi-glass-card">
+          <div className="kpi-head">
+            <span className="kpi-label">Pending Review</span>
+            <CheckSquare size={16} style={{ color: '#f5b544' }} />
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>
-            Discount &gt; 10.0% or Margin &lt; 25.0%
+          <div className="kpi-main-val" style={{ color: '#f5b544' }}>
+            3 Pending
           </div>
-          <div style={{ fontSize: '11px', color: '#64748b' }}>Route to Sales Operations Director</div>
+          <div className="kpi-sub-label">Requires manager action</div>
         </div>
 
-        <div style={{ borderRight: '1px solid #e2e8f0', paddingRight: '16px' }}>
-          <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
-            Tier 2: Executive Threshold
+        <div className="kpi-glass-card">
+          <div className="kpi-head">
+            <span className="kpi-label">Returned for Revision</span>
+            <RotateCcw size={16} style={{ color: '#38d9ff' }} />
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#92400e', marginTop: '2px' }}>
-            Discount &gt; 20.0% or Margin &lt; 18.0%
+          <div className="kpi-main-val" style={{ color: '#38d9ff' }}>
+            1 Returned
           </div>
-          <div style={{ fontSize: '11px', color: '#64748b' }}>Route to VP of Enterprise Sales</div>
+          <div className="kpi-sub-label">Awaiting sales rep resubmission</div>
         </div>
 
-        <div>
-          <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
-            Tier 3: Controller Hold
+        <div className="kpi-glass-card">
+          <div className="kpi-head">
+            <span className="kpi-label">Approved YTD</span>
+            <CheckCircle size={16} style={{ color: '#31d38a' }} />
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#991b1b', marginTop: '2px' }}>
-            Credit Limit Overrun or Net 60 Terms
+          <div className="kpi-main-val" style={{ color: '#31d38a' }}>
+            12 Approved
           </div>
-          <div style={{ fontSize: '11px', color: '#64748b' }}>Route to Finance Controller</div>
+          <div className="kpi-sub-label">Audit logs reconciled</div>
         </div>
       </div>
 
-      {/* Tabs Toolbar */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', marginBottom: '16px', gap: '8px' }}>
-        <button
-          className={`btn btn-ghost ${activeTab === 'pending' ? 'btn-primary' : ''}`}
-          style={{ borderRadius: '4px 4px 0 0', borderBottom: activeTab === 'pending' ? '2px solid #2563eb' : 'none' }}
-          onClick={() => setActiveTab('pending')}
-        >
-          Pending Review ({approvals.filter((a) => a.status === 'pending').length})
-        </button>
+      {/* Visual Approval Progression Stepper */}
+      <div className="glass-panel" style={{ padding: '16px 24px', marginBottom: '20px' }}>
+        <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, marginBottom: '8px' }}>
+          Visual Governance Progression Flow
+        </div>
 
-        <button
-          className={`btn btn-ghost ${activeTab === 'approved' ? 'btn-primary' : ''}`}
-          style={{ borderRadius: '4px 4px 0 0', borderBottom: activeTab === 'approved' ? '2px solid #2563eb' : 'none' }}
-          onClick={() => setActiveTab('approved')}
-        >
-          Approved Audit Trail ({approvals.filter((a) => a.status === 'approved').length})
-        </button>
-
-        <button
-          className={`btn btn-ghost ${activeTab === 'all' ? 'btn-primary' : ''}`}
-          style={{ borderRadius: '4px 4px 0 0', borderBottom: activeTab === 'all' ? '2px solid #2563eb' : 'none' }}
-          onClick={() => setActiveTab('all')}
-        >
-          All Requests ({approvals.length})
-        </button>
+        <div className="stepper-row">
+          <div className="stepper-step completed">
+            <CheckCircle size={16} />
+            <span>1. Submitted</span>
+          </div>
+          <div className="stepper-line completed" />
+          <div className="stepper-step active">
+            <CheckSquare size={16} />
+            <span>2. Sales Manager</span>
+          </div>
+          <div className="stepper-line" />
+          <div className="stepper-step">
+            <span>3. Finance Controller</span>
+          </div>
+          <div className="stepper-line" />
+          <div className="stepper-step">
+            <span>4. Confirmed</span>
+          </div>
+        </div>
       </div>
 
       {/* Approvals Table */}
@@ -155,8 +144,8 @@ export const ApprovalsView: React.FC<ApprovalsViewProps> = ({
           description="All quotation proposals comply with standard representative delegation rules."
         />
       ) : (
-        <div className="table-container">
-          <table className="data-table">
+        <div className="table-glass-wrapper">
+          <table className="table-glass">
             <thead>
               <tr>
                 <th>Quote Code</th>
@@ -165,7 +154,7 @@ export const ApprovalsView: React.FC<ApprovalsViewProps> = ({
                 <th className="number-cell">Discount %</th>
                 <th className="number-cell">Margin %</th>
                 <th className="number-cell">Grand Total</th>
-                <th>Trigger Rationale</th>
+                <th>Risk Profile</th>
                 <th>Governance Tier</th>
                 <th>Status</th>
                 <th className="number-cell">Actions</th>
@@ -174,21 +163,21 @@ export const ApprovalsView: React.FC<ApprovalsViewProps> = ({
             <tbody>
               {filteredApprovals.map((a) => (
                 <tr key={a.id}>
-                  <td className="font-mono" style={{ fontWeight: 700, color: '#2563eb' }}>
+                  <td className="font-mono" style={{ fontWeight: 700, color: '#2f8cff' }}>
                     {a.quotationCode}
                   </td>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{a.customerName}</div>
+                    <div style={{ fontWeight: 600, color: '#f5f7fa' }}>{a.customerName}</div>
                   </td>
                   <td>{a.salesRep}</td>
-                  <td className="number-cell font-mono" style={{ fontWeight: 700, color: a.requestedDiscountPct > 15 ? '#b45309' : '#0f172a' }}>
+                  <td className="number-cell font-mono" style={{ fontWeight: 700, color: a.requestedDiscountPct > 15 ? '#f5b544' : '#f5f7fa' }}>
                     {a.requestedDiscountPct.toFixed(1)}%
                   </td>
                   <td
                     className="number-cell font-mono"
                     style={{
                       fontWeight: 600,
-                      color: a.marginPct < 20 ? '#dc2626' : '#166534',
+                      color: a.marginPct < 20 ? '#ff6b72' : '#31d38a',
                     }}
                   >
                     {a.marginPct.toFixed(1)}%
@@ -196,11 +185,13 @@ export const ApprovalsView: React.FC<ApprovalsViewProps> = ({
                   <td className="number-cell font-mono" style={{ fontWeight: 700 }}>
                     ${a.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   </td>
-                  <td style={{ fontSize: '12px', color: '#475569', maxWidth: '240px' }}>
-                    {a.triggerReason}
+                  <td>
+                    <span className="badge-glass badge-glass-warning">
+                      Blended Risk: HIGH
+                    </span>
                   </td>
                   <td>
-                    <span className="badge badge-neutral">{a.tier}</span>
+                    <span className="badge-glass badge-glass-neutral">{a.tier}</span>
                   </td>
                   <td>
                     <Badge status={a.status} />
@@ -209,20 +200,20 @@ export const ApprovalsView: React.FC<ApprovalsViewProps> = ({
                     {a.status === 'pending' ? (
                       <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                         <button
-                          className="btn btn-success btn-sm"
+                          className="btn-glass btn-glass-success btn-sm"
                           onClick={() => handleOpenActionModal(a, 'approve')}
                         >
                           <CheckCircle size={13} /> Approve
                         </button>
                         <button
-                          className="btn btn-danger btn-sm"
+                          className="btn-glass btn-glass-danger btn-sm"
                           onClick={() => handleOpenActionModal(a, 'reject')}
                         >
                           <XCircle size={13} /> Reject
                         </button>
                       </div>
                     ) : (
-                      <span style={{ fontSize: '11px', color: '#64748b' }}>
+                      <span style={{ fontSize: '11px', color: '#9aa8ba' }}>
                         By {a.reviewedBy || 'System Controller'}
                       </span>
                     )}
@@ -236,38 +227,39 @@ export const ApprovalsView: React.FC<ApprovalsViewProps> = ({
 
       {/* Rationale Modal */}
       {selectedApproval && actionType && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ width: '540px' }}>
-            <div className="modal-header">
-              <h3 className="card-title" style={{ margin: 0 }}>
+        <div className="search-modal-backdrop">
+          <div className="search-modal-box" style={{ width: '540px' }}>
+            <div className="search-modal-input-wrap">
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#f5f7fa', margin: 0 }}>
                 {actionType === 'approve' ? 'Approve Quotation' : 'Reject Quotation'} ({selectedApproval.quotationCode})
               </h3>
             </div>
 
             <form onSubmit={handleConfirmAction}>
-              <div className="modal-body">
-                <div style={{ marginBottom: '16px', fontSize: '13px', color: '#475569' }}>
-                  Customer Account: <strong>{selectedApproval.customerName}</strong> | Requested Discount:{' '}
-                  <strong className="font-mono">{selectedApproval.requestedDiscountPct}%</strong>
+              <div style={{ padding: '20px' }}>
+                <div style={{ marginBottom: '16px', fontSize: '13px', color: '#9aa8ba' }}>
+                  Customer Account: <strong style={{ color: '#f5f7fa' }}>{selectedApproval.customerName}</strong> | Requested Discount:{' '}
+                  <strong className="font-mono" style={{ color: '#f5b544' }}>{selectedApproval.requestedDiscountPct}%</strong>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Audit Rationale & Operational Notes *</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Audit Rationale & Operational Notes *</label>
                   <textarea
-                    className="form-textarea"
+                    className="input-glass-select"
                     rows={4}
                     value={rationaleInput}
                     onChange={(e) => setRationaleInput(e.target.value)}
                     placeholder="Provide detailed justification for compliance audit trail..."
                     required
+                    style={{ width: '100%' }}
                   />
                 </div>
               </div>
 
-              <div className="modal-footer">
+              <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn-glass btn-glass-secondary"
                   onClick={() => {
                     setSelectedApproval(null);
                     setActionType(null);
@@ -277,7 +269,7 @@ export const ApprovalsView: React.FC<ApprovalsViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className={`btn ${actionType === 'approve' ? 'btn-success' : 'btn-danger'}`}
+                  className={`btn-glass ${actionType === 'approve' ? 'btn-glass-success' : 'btn-glass-danger'}`}
                 >
                   {actionType === 'approve' ? 'Confirm Approval' : 'Confirm Rejection'}
                 </button>

@@ -1,129 +1,146 @@
 import React from 'react';
-import { ModuleType, ViewMode } from '../../types';
+import { ViewMode } from '../../types';
 import {
   Layers,
-  LayoutDashboard,
-  FileText,
-  CheckSquare,
-  Truck,
-  Repeat,
-  Receipt,
-  Activity,
-  BarChart3,
-  Package,
-  UserCheck,
-  ChevronDown,
+  Search,
   ExternalLink,
   ShieldCheck,
+  Bell,
+  ChevronDown,
 } from 'lucide-react';
 
 interface HeaderProps {
-  activeModule: ModuleType;
-  setActiveModule: (module: ModuleType) => void;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
+  onOpenSearch: () => void;
   pendingApprovalsCount: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  activeModule,
-  setActiveModule,
   viewMode,
   setViewMode,
+  onOpenSearch,
   pendingApprovalsCount,
 }) => {
-  const navItems: { id: ModuleType; label: string; icon: React.ReactNode; count?: number }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={15} /> },
-    { id: 'quotations', label: 'Quotations', icon: <FileText size={15} /> },
-    {
-      id: 'approvals',
-      label: 'Approvals',
-      icon: <CheckSquare size={15} />,
-      count: pendingApprovalsCount,
-    },
-    { id: 'fulfillment', label: 'Fulfillment', icon: <Truck size={15} /> },
-    { id: 'subscriptions', label: 'Subscriptions', icon: <Repeat size={15} /> },
-    { id: 'invoices', label: 'Invoices', icon: <Receipt size={15} /> },
-    { id: 'deal-health', label: 'Deal Health', icon: <Activity size={15} /> },
-    { id: 'reports', label: 'Reports', icon: <BarChart3 size={15} /> },
-    { id: 'products', label: 'Products', icon: <Package size={15} /> },
-  ];
-
   return (
-    <header className="top-header">
-      <div className="brand-section">
-        <a href="#" className="brand-logo" onClick={(e) => { e.preventDefault(); setActiveModule('dashboard'); }}>
-          <div className="brand-icon-box">
+    <header className="top-header-glass">
+      <div className="header-left">
+        <a href="#" className="brand-block" onClick={(e) => e.preventDefault()}>
+          <div className="brand-icon-glass">
             <Layers size={18} />
           </div>
-          <span>DealFlow360</span>
+          <div className="brand-titles">
+            <span className="brand-name">DealFlow360</span>
+            <span className="brand-tagline">Quote. Approve. Fulfil. Grow.</span>
+          </div>
         </a>
 
-        <div className="org-selector">
-          <ShieldCheck size={13} style={{ color: '#38bdf8' }} />
-          <span>Acme Global Ops</span>
-          <ChevronDown size={12} style={{ opacity: 0.7 }} />
-        </div>
+        <div style={{ width: '1px', height: '24px', background: 'rgba(255, 255, 255, 0.1)', margin: '0 8px' }} />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, color: '#4ade80', backgroundColor: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', padding: '2px 8px', borderRadius: '4px' }}>
-          <span style={{ width: '6px', height: '6px', backgroundColor: '#4ade80', borderRadius: '50%' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, color: '#4ade80', backgroundColor: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', padding: '3px 8px', borderRadius: '4px' }}>
+          <span style={{ width: '6px', height: '6px', backgroundColor: '#4ade80', borderRadius: '50%', boxShadow: '0 0 6px #4ade80' }} />
           <span>Supabase Connected</span>
         </div>
       </div>
 
-      <nav className="nav-modules">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            className={`nav-link ${activeModule === item.id && viewMode === 'internal' ? 'active' : ''}`}
-            onClick={() => {
-              setViewMode('internal');
-              setActiveModule(item.id);
-            }}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-            {item.count !== undefined && item.count > 0 && (
-              <span
-                style={{
-                  backgroundColor: '#ef4444',
-                  color: '#ffffff',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: '1px 6px',
-                  borderRadius: '9999px',
-                }}
-              >
-                {item.count}
-              </span>
-            )}
-          </button>
-        ))}
-      </nav>
+      {/* Center Global Search Trigger */}
+      <div className="header-search-bar" onClick={onOpenSearch}>
+        <Search size={14} style={{ color: '#38d9ff' }} />
+        <input
+          type="text"
+          readOnly
+          placeholder="Search quotations, customers, products..."
+        />
+        <div className="kbd-shortcut">⌘ K</div>
+      </div>
 
-      <div className="nav-right">
-        {/* Dual View Switcher */}
-        <div className="view-mode-toggle">
+      {/* Right Controls */}
+      <div className="header-right">
+        {/* View Switcher */}
+        <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(7, 17, 31, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '2px' }}>
           <button
             className={`toggle-btn ${viewMode === 'internal' ? 'active' : ''}`}
             onClick={() => setViewMode('internal')}
+            style={{
+              padding: '5px 12px',
+              fontSize: '12px',
+              fontWeight: 600,
+              borderRadius: '6px',
+              backgroundColor: viewMode === 'internal' ? '#2f8cff' : 'transparent',
+              color: viewMode === 'internal' ? '#ffffff' : '#9aa8ba',
+            }}
           >
             Sales Ops Console
           </button>
           <button
             className={`toggle-btn ${viewMode === 'customer' ? 'active' : ''}`}
             onClick={() => setViewMode('customer')}
+            style={{
+              padding: '5px 12px',
+              fontSize: '12px',
+              fontWeight: 600,
+              borderRadius: '6px',
+              backgroundColor: viewMode === 'customer' ? '#2f8cff' : 'transparent',
+              color: viewMode === 'customer' ? '#ffffff' : '#9aa8ba',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
           >
             <ExternalLink size={12} />
             Customer Portal (Acme)
           </button>
         </div>
 
-        <div className="user-profile">
-          <div className="avatar">SJ</div>
-          <div className="user-meta">
-            <span className="user-name">Sarah Jenkins</span>
-            <span className="user-role">Sales Ops Lead</span>
+        {/* Notifications Icon */}
+        <button
+          style={{
+            position: 'relative',
+            color: '#9aa8ba',
+            padding: '6px',
+            borderRadius: '6px',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <Bell size={16} />
+          {pendingApprovalsCount > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '2px',
+                right: '2px',
+                width: '8px',
+                height: '8px',
+                backgroundColor: '#ff6b72',
+                borderRadius: '50%',
+                boxShadow: '0 0 6px #ff6b72',
+              }}
+            />
+          )}
+        </button>
+
+        {/* User Profile */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              background: 'linear-gradient(135deg, #2f8cff, #8b5cf6)',
+              color: '#ffffff',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: '13px',
+            }}
+          >
+            RJ
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: '#f5f7fa' }}>Rahul / Sarah</span>
+            <span style={{ fontSize: '11px', color: '#9aa8ba' }}>Sales Ops Director</span>
           </div>
         </div>
       </div>

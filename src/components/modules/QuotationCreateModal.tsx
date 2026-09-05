@@ -38,7 +38,6 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
 
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId) || customers[0];
 
-  // Recalculate line totals & totals
   const handleItemChange = (
     index: number,
     field: keyof QuotationItem,
@@ -113,13 +112,12 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
   const totalCogs = items.reduce((acc, item) => acc + item.cogs * item.quantity, 0);
   const totalMarginPct = grandTotal > 0 ? ((grandTotal - totalCogs) / grandTotal) * 100 : 0;
 
-  // Guardrail rule: Discount > 15% requires approval
+  // Guardrail rule
   const requiresApproval = avgDiscountPct > 15 || items.some((i) => i.discountPct > 15);
   const approvalReason = requiresApproval
     ? `Average quotation discount (${avgDiscountPct.toFixed(1)}%) exceeds 15.0% rep delegation limit.`
     : undefined;
 
-  // Recommendation engine (find products related to selected items)
   const currentProductIds = items.map((i) => i.productId);
   const recommendedProducts = products.filter(
     (p) =>
@@ -170,26 +168,26 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
   };
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal-content" style={{ width: '920px' }}>
-        <div className="modal-header">
+    <div className="search-modal-backdrop">
+      <div className="search-modal-box" style={{ width: '920px' }}>
+        <div className="search-modal-input-wrap">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h2 className="card-title" style={{ margin: 0 }}>Create New Quotation</h2>
-            <span className="badge badge-neutral">Draft Generator</span>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#f5f7fa', margin: 0 }}>Create New Quotation</h2>
+            <span className="badge-glass badge-glass-neutral">Draft Generator</span>
           </div>
-          <button className="btn btn-ghost" onClick={onClose}>
+          <button onClick={onClose} style={{ color: '#9aa8ba' }}>
             <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <div className="modal-body">
-            {/* Top Customer & Rep Configuration */}
-            <div className="form-grid" style={{ marginBottom: '20px' }}>
-              <div className="form-group">
-                <label className="form-label">Target Customer Account *</label>
+        <form onSubmit={handleSubmit}>
+          <div style={{ padding: '20px', maxHeight: '75vh', overflowY: 'auto' }}>
+            {/* Top Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Target Customer Account *</label>
                 <select
-                  className="form-select"
+                  className="input-glass-select"
                   value={selectedCustomerId}
                   onChange={(e) => setSelectedCustomerId(e.target.value)}
                 >
@@ -201,20 +199,20 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Assigned Sales Representative</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Assigned Sales Representative</label>
                 <input
                   type="text"
-                  className="form-input"
+                  className="input-glass-select"
                   value={salesRep}
                   onChange={(e) => setSalesRep(e.target.value)}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Warehouse Dispatch Hub *</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Warehouse Dispatch Hub *</label>
                 <select
-                  className="form-select"
+                  className="input-glass-select"
                   value={warehouseHub}
                   onChange={(e) => setWarehouseHub(e.target.value as WarehouseHub)}
                 >
@@ -224,39 +222,41 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Expiration Date</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 600, color: '#9aa8ba' }}>Expiration Date</label>
                 <input
                   type="date"
-                  className="form-input"
+                  className="input-glass-select"
                   value={validUntil}
                   onChange={(e) => setValidUntil(e.target.value)}
                 />
               </div>
             </div>
 
-            {/* Discount Guardrail Banner */}
+            {/* Guardrail Banner */}
             {requiresApproval && (
-              <div className="alert-banner warning">
-                <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <strong>Approval Router Triggered</strong>
-                  <p style={{ marginTop: '2px' }}>{approvalReason}</p>
+              <div className="alert-glass-warning" style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <AlertTriangle size={18} style={{ color: '#f5b544' }} />
+                  <div>
+                    <strong style={{ color: '#f5b544' }}>Approval Router Triggered</strong>
+                    <p style={{ fontSize: '12px', color: '#9aa8ba', marginTop: '2px' }}>{approvalReason}</p>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Line Items Table */}
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span className="card-title" style={{ fontSize: '13px' }}>Quotation Line Items</span>
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleAddItem()}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#f5f7fa' }}>Quotation Line Items</span>
+                <button type="button" className="btn-glass btn-glass-secondary btn-sm" onClick={() => handleAddItem()}>
                   <Plus size={14} /> Add Line Item
                 </button>
               </div>
 
-              <div className="table-container">
-                <table className="data-table">
+              <div className="table-glass-wrapper">
+                <table className="table-glass">
                   <thead>
                     <tr>
                       <th style={{ width: '32%' }}>Product / SKU</th>
@@ -273,7 +273,7 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
                       <tr key={item.id}>
                         <td>
                           <select
-                            className="form-select"
+                            className="input-glass-select"
                             style={{ padding: '4px 8px', fontSize: '12px', width: '100%' }}
                             value={item.productId}
                             onChange={(e) => handleItemChange(idx, 'productId', e.target.value)}
@@ -290,37 +290,40 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
                           <input
                             type="number"
                             min="1"
-                            className="form-input"
+                            className="input-glass-select"
                             style={{ padding: '4px 6px', fontSize: '12px', width: '64px' }}
                             value={item.quantity}
                             onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)}
                           />
                         </td>
                         <td>
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="0.5"
-                            className="form-input"
-                            style={{
-                              padding: '4px 6px',
-                              fontSize: '12px',
-                              width: '70px',
-                              borderColor: item.discountPct > 15 ? '#f59e0b' : '#cbd5e1',
-                            }}
-                            value={item.discountPct}
-                            onChange={(e) => handleItemChange(idx, 'discountPct', e.target.value)}
-                          />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="0.5"
+                              className="input-glass-select"
+                              style={{
+                                padding: '4px 6px',
+                                fontSize: '12px',
+                                width: '70px',
+                                borderColor: item.discountPct > 15 ? '#f5b544' : 'var(--border-glass-light)',
+                              }}
+                              value={item.discountPct}
+                              onChange={(e) => handleItemChange(idx, 'discountPct', e.target.value)}
+                            />
+                            {item.discountPct > 15 && <span className="tag-overlimit">OVER +8pt</span>}
+                          </div>
                         </td>
                         <td className="number-cell font-mono" style={{ fontWeight: 600 }}>
-                          ${item.lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ${item.lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                         </td>
                         <td
                           className="number-cell font-mono"
                           style={{
                             fontWeight: 600,
-                            color: item.marginPct < 20 ? '#dc2626' : '#166534',
+                            color: item.marginPct < 20 ? '#ff6b72' : '#31d38a',
                           }}
                         >
                           {item.marginPct.toFixed(1)}%
@@ -328,8 +331,7 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
                         <td>
                           <button
                             type="button"
-                            className="btn btn-ghost"
-                            style={{ padding: '4px', color: '#94a3b8' }}
+                            style={{ color: '#9aa8ba' }}
                             onClick={() => handleRemoveItem(idx)}
                             disabled={items.length <= 1}
                           >
@@ -343,29 +345,29 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
               </div>
             </div>
 
-            {/* Smart Upsell/Cross-sell Recommendations Panel */}
+            {/* Smart Upsell Recommendations */}
             {recommendedProducts.length > 0 && (
               <div
                 style={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '6px',
+                  background: 'rgba(56, 217, 255, 0.08)',
+                  border: '1px solid rgba(56, 217, 255, 0.2)',
+                  borderRadius: '8px',
                   padding: '12px 16px',
-                  marginBottom: '16px',
+                  marginBottom: '20px',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '12px', fontWeight: 600, color: '#1e40af' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '12px', fontWeight: 600, color: '#38d9ff' }}>
                   <Sparkles size={14} />
-                  <span>Recommended Upsell / Cross-Sell Additions</span>
+                  <span>Recommended for this deal</span>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   {recommendedProducts.map((prod) => (
                     <div
                       key={prod.id}
                       style={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '4px',
+                        background: 'rgba(15, 28, 48, 0.8)',
+                        border: '1px solid var(--border-glass-light)',
+                        borderRadius: '6px',
                         padding: '6px 12px',
                         display: 'flex',
                         alignItems: 'center',
@@ -374,15 +376,15 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
                       }}
                     >
                       <div>
-                        <strong>{prod.name}</strong> (${prod.listPrice.toFixed(2)})
+                        <strong style={{ color: '#f5f7fa' }}>{prod.name}</strong> (${prod.listPrice.toFixed(2)})
                       </div>
                       <button
                         type="button"
-                        className="btn btn-secondary btn-sm"
+                        className="btn-glass btn-glass-secondary btn-sm"
                         style={{ padding: '2px 8px', fontSize: '11px' }}
                         onClick={() => handleAddItem(prod)}
                       >
-                        <Plus size={12} /> Add to Quote
+                        <Plus size={12} /> Add
                       </button>
                     </div>
                   ))}
@@ -395,32 +397,33 @@ export const QuotationCreateModal: React.FC<QuotationCreateModalProps> = ({
               style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                backgroundColor: '#f1f5f9',
-                padding: '12px 20px',
-                borderRadius: '6px',
+                background: 'rgba(7, 17, 31, 0.7)',
+                border: '1px solid var(--border-glass)',
+                padding: '14px 20px',
+                borderRadius: '8px',
                 gap: '32px',
               }}
             >
-              <div style={{ textTransform: 'uppercase', fontSize: '11px', color: '#64748b' }}>
-                Subtotal: <strong className="font-mono" style={{ color: '#0f172a', fontSize: '13px' }}>${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+              <div style={{ textTransform: 'uppercase', fontSize: '11px', color: '#9aa8ba' }}>
+                Subtotal: <strong className="font-mono" style={{ color: '#f5f7fa', fontSize: '13px' }}>${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
               </div>
-              <div style={{ textTransform: 'uppercase', fontSize: '11px', color: '#64748b' }}>
-                Discount ({avgDiscountPct.toFixed(1)}%): <strong className="font-mono" style={{ color: discountAmount > 0 ? '#b45309' : '#0f172a', fontSize: '13px' }}>-${discountAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+              <div style={{ textTransform: 'uppercase', fontSize: '11px', color: '#9aa8ba' }}>
+                Discount ({avgDiscountPct.toFixed(1)}%): <strong className="font-mono" style={{ color: discountAmount > 0 ? '#f5b544' : '#f5f7fa', fontSize: '13px' }}>-${discountAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
               </div>
-              <div style={{ textTransform: 'uppercase', fontSize: '11px', color: '#64748b' }}>
-                Overall Margin: <strong className="font-mono" style={{ color: totalMarginPct < 20 ? '#dc2626' : '#166534', fontSize: '13px' }}>{totalMarginPct.toFixed(1)}%</strong>
+              <div style={{ textTransform: 'uppercase', fontSize: '11px', color: '#9aa8ba' }}>
+                Overall Margin: <strong className="font-mono" style={{ color: totalMarginPct < 20 ? '#ff6b72' : '#31d38a', fontSize: '13px' }}>{totalMarginPct.toFixed(1)}%</strong>
               </div>
-              <div style={{ textTransform: 'uppercase', fontSize: '11px', color: '#0f172a', fontWeight: 700 }}>
-                Grand Total: <strong className="font-mono" style={{ color: '#2563eb', fontSize: '16px' }}>${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+              <div style={{ textTransform: 'uppercase', fontSize: '11px', color: '#f5f7fa', fontWeight: 700 }}>
+                Grand Total: <strong className="font-mono" style={{ color: '#38d9ff', fontSize: '16px' }}>${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
               </div>
             </div>
           </div>
 
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+          <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <button type="button" className="btn-glass btn-glass-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn-glass btn-glass-primary">
               <Check size={15} />
               {requiresApproval ? 'Submit for Approval' : 'Create Approved Quote'}
             </button>
