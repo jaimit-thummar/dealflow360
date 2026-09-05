@@ -35,9 +35,18 @@ import { ReportsView } from './components/modules/ReportsView';
 import { ProductsView } from './components/modules/ProductsView';
 import { CustomerPortalView } from './components/customer/CustomerPortalView';
 import { QuotationCreateModal } from './components/modules/QuotationCreateModal';
+import { AuthView, UserAuthData } from './components/auth/AuthView';
 import { saveQuotationToSupabase } from './lib/supabaseService';
 
 export const App: React.FC = () => {
+  // Authentication State (Default authenticated for seamless demo experience, or toggled)
+  const [currentUser, setCurrentUser] = useState<UserAuthData | null>({
+    email: 'rahul@dealflow360.com',
+    name: 'Rahul Sharma',
+    role: 'internal',
+    company: 'DealFlow360 Operations',
+  });
+
   const [viewMode, setViewMode] = useState<ViewMode>('internal');
   const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
   const [activeQuotationForPortal, setActiveQuotationForPortal] = useState<string | undefined>(undefined);
@@ -80,6 +89,24 @@ export const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Auth Handlers
+  const handleLoginSuccess = (user: UserAuthData) => {
+    setCurrentUser(user);
+    if (user.role === 'customer') {
+      setViewMode('customer');
+      addToast('success', `Welcome back, ${user.name}`, 'Redirected to your Acme Corp Customer Procurement Portal.');
+    } else {
+      setViewMode('internal');
+      setActiveModule('dashboard');
+      addToast('success', `Welcome back, ${user.name}`, 'Logged in to DealFlow360 Sales Operations Console.');
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    addToast('info', 'Logged Out', 'You have been safely signed out of DealFlow360.');
+  };
 
   // Handler: Create Quotation
   const handleCreateQuotation = (newQuotation: Quotation) => {
@@ -154,7 +181,7 @@ export const App: React.FC = () => {
           ? {
               ...a,
               status: 'approved',
-              reviewedBy: 'Sarah Jenkins (Ops Director)',
+              reviewedBy: 'Rahul Sharma (Ops Director)',
               reviewedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
               rationale,
             }
@@ -177,7 +204,7 @@ export const App: React.FC = () => {
           ? {
               ...a,
               status: 'rejected',
-              reviewedBy: 'Sarah Jenkins (Ops Director)',
+              reviewedBy: 'Rahul Sharma (Ops Director)',
               reviewedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
               rationale,
             }
@@ -324,6 +351,16 @@ export const App: React.FC = () => {
 
   const pendingApprovalsCount = approvals.filter((a) => a.status === 'pending').length;
 
+  // Unauthenticated Auth View
+  if (!currentUser) {
+    return (
+      <div className="app-frame">
+        <AuthView onLoginSuccess={handleLoginSuccess} />
+        <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
+      </div>
+    );
+  }
+
   return (
     <div className="app-frame">
       {/* Top Application Header */}
@@ -332,6 +369,8 @@ export const App: React.FC = () => {
         setViewMode={setViewMode}
         onOpenSearch={() => setIsSearchOpen(true)}
         pendingApprovalsCount={pendingApprovalsCount}
+        user={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Main Body with Glass Sidebar */}

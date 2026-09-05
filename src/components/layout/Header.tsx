@@ -1,12 +1,12 @@
 import React from 'react';
 import { ViewMode } from '../../types';
+import { UserAuthData } from '../auth/AuthView';
 import {
   Layers,
   Search,
   ExternalLink,
-  ShieldCheck,
   Bell,
-  ChevronDown,
+  LogOut,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -14,6 +14,8 @@ interface HeaderProps {
   setViewMode: (mode: ViewMode) => void;
   onOpenSearch: () => void;
   pendingApprovalsCount: number;
+  user: UserAuthData | null;
+  onLogout: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,6 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
   setViewMode,
   onOpenSearch,
   pendingApprovalsCount,
+  user,
+  onLogout,
 }) => {
   return (
     <header className="top-header-glass">
@@ -44,15 +48,17 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Center Global Search Trigger */}
-      <div className="header-search-bar" onClick={onOpenSearch}>
-        <Search size={14} style={{ color: '#38d9ff' }} />
-        <input
-          type="text"
-          readOnly
-          placeholder="Search quotations, customers, products..."
-        />
-        <div className="kbd-shortcut">⌘ K</div>
-      </div>
+      {viewMode === 'internal' && (
+        <div className="header-search-bar" onClick={onOpenSearch}>
+          <Search size={14} style={{ color: '#38d9ff' }} />
+          <input
+            type="text"
+            readOnly
+            placeholder="Search quotations, customers, products..."
+          />
+          <div className="kbd-shortcut">⌘ K</div>
+        </div>
+      )}
 
       {/* Right Controls */}
       <div className="header-right">
@@ -120,8 +126,8 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </button>
 
-        {/* User Profile */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* User Profile & Logout */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div
             style={{
               width: '32px',
@@ -136,12 +142,32 @@ export const Header: React.FC<HeaderProps> = ({
               fontSize: '13px',
             }}
           >
-            RJ
+            {user?.name ? user.name.substring(0, 2).toUpperCase() : 'RJ'}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: '#f5f7fa' }}>Rahul / Sarah</span>
-            <span style={{ fontSize: '11px', color: '#9aa8ba' }}>Sales Ops Director</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: '#f5f7fa' }}>
+              {user?.name || 'Rahul Sharma'}
+            </span>
+            <span style={{ fontSize: '11px', color: '#9aa8ba' }}>
+              {user?.role === 'customer' ? `${user.company || 'Acme Corp'} Buyer` : 'Sales Ops Director'}
+            </span>
           </div>
+
+          <button
+            onClick={onLogout}
+            title="Log Out"
+            style={{
+              color: '#9aa8ba',
+              padding: '6px',
+              borderRadius: '6px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              cursor: 'pointer',
+              marginLeft: '4px',
+            }}
+          >
+            <LogOut size={15} />
+          </button>
         </div>
       </div>
     </header>
