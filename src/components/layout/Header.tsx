@@ -64,6 +64,11 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Acme Global Ops</span>
           <ChevronDown size={12} style={{ opacity: 0.7 }} />
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, color: '#4ade80', backgroundColor: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', padding: '2px 8px', borderRadius: '4px' }}>
+          <span style={{ width: '6px', height: '6px', backgroundColor: '#4ade80', borderRadius: '50%' }} />
+          <span>Supabase Connected</span>
+        </div>
       </div>
 
       <nav className="nav-modules">
